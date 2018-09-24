@@ -29,11 +29,19 @@
 
 .Histogram {
 }
+.VerticalBarSpace {
+  height: 50vh;
+}
 .Histogram > div {
-  width: 2em;
   display: inline-block;
 }
 
 .VerticalBar {
   background: #e84
+}
+
+button {
+  width: 90%;
+  height: 5em;
+  margin-top: 1em;
 }

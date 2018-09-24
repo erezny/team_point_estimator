@@ -34,7 +34,7 @@ export default class App extends Component {
   handleChoosePoints = (msg) => {
     const estimateNum = msg.msg.msg;
     const clientId = msg.client_id;
-    
+
     this.setState( (prevState) => ({
       pointEstimates: {
         ...prevState.pointEstimates,
@@ -91,14 +91,18 @@ export class PointEstimates extends Component {
     let returnValue = [];
     let histogram = this.histogram;
 
+    let avgWidth = `${Math.floor (100 / histogram.size)}%`;
+
     histogram.forEach((numPeople, numPoints ) => { 
       returnValue.push(
-        <div>
+        <div style={{width: avgWidth}}>
+        <div className="VerticalBarSpace">
           {this.props.selfHasEstimated && 
             <div className="VerticalBar" style={{height: `${numPeople}em`}}>
               &nbsp;
             </div>
           }
+        &nbsp;</div>
           <div>
             <button onClick={() => this.props.handleChoice(numPoints)}>
               {numPoints}
