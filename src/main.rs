@@ -1,4 +1,4 @@
-#[allow(unused_imports)]
+#![allow(unused_imports)]
 extern crate actix_web;
 extern crate actix;
 use actix::prelude::*;
@@ -120,7 +120,11 @@ impl AppState {
 
 fn main() {
     let app_state = Arc::new(RwLock::new(AppState::new()));
-    
+
+    let yarn_process = std::process::Command::new("yarn")
+            .current_dir("./client")
+            .args(&["start"]).spawn().unwrap();
+
     server::new(move || {
         App::with_state(app_state.clone())
         .resource("/api/ws", |r| r.f(|req| ws::start(req, Ws::new())))
