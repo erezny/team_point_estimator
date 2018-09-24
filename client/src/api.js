@@ -5,8 +5,8 @@ import camelCase from 'camelcase';
 
 const loc = window.location;
 const prot = loc.protocol === 'https:' ? 'wss:' : 'ws:';
-// let url = prot + '//' + loc.host + '/api/ws/';
-let url = "ws://localhost:8080/api/ws"
+let url = prot + '//' + loc.hostname + ':8080/api/ws';
+// let url = "ws://localhost:8080/api/ws"
 const socket = () => {
 	let socket = null;
 	try {

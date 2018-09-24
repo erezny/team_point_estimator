@@ -126,7 +126,7 @@ fn main() {
     server::new(move || {
         App::with_state(app_state.clone())
         .resource("/api/ws", |r| r.f(|req| ws::start(req, Ws::new())))
-    }).bind("127.0.0.1:8080")
+    }).bind("0.0.0.0:8080")
         .unwrap()
         .run();
 
