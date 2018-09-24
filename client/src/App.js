@@ -7,25 +7,40 @@ export default class App extends Component {
   constructor() {
     super();
     this.api = new Api();
-    this.api.handle.choosePoints = this.handleChoosePoints;
-    this.api.handle.clear = this.handleClear;
-    this.api.sendApiPacket("test message");
+    this.api.handle.choosePoints = (msg) => this.handleChoosePoints(msg);
+    this.api.handle.clear = (msg) => this.handleClear(msg);
+    
+    this.randomRegistrationId = `${Math.random()}`
+    this.clientId = undefined;
+    this.api.sendApiPacket("register", this.randomRegistrationId);
+    this.api.handle.register = (msg) => this.handleRegister(msg);
+
     this.state = {
-      pointEstimates: {}
+      pointEstimates: {},
+      selfHasEstimated: false
     }
   }
+
+  handleRegister = (msg) => {
+    if (msg.msg.msg == this.randomRegistrationId && this.clientId === undefined) {
+      this.clientId = msg.client_id;
+    }
+  }
+
   handlePointChoice = (numPoints) => {
     this.api.sendApiPacket("choosePoints", numPoints)
   }
 
   handleChoosePoints = (msg) => {
     const estimateNum = msg.msg.msg;
-
+    const clientId = msg.client_id;
+    
     this.setState( (prevState) => ({
       pointEstimates: {
         ...prevState.pointEstimates,
         [msg.client_id]: estimateNum,
-      }
+      },
+      selfHasEstimated: prevState.selfHasEstimated || clientId === this.clientId
     }))
   }
 
@@ -36,13 +51,17 @@ export default class App extends Component {
   handleClear = () => {
     this.setState( {
       pointEstimates: {},
+      selfHasEstimated: false
     } )
   }
 
   render() {
     return (
       <div className="App">
-        <PointEstimates pointEstimates={this.state.pointEstimates} handleChoice={this.handlePointChoice}  />
+        <PointEstimates 
+          pointEstimates={this.state.pointEstimates} 
+          handleChoice={this.handlePointChoice} 
+          selfHasEstimated={this.state.selfHasEstimated} />
         <button onClick={this.handleClickClear}>Clear</button>
       </div>
     );
@@ -65,7 +84,6 @@ export class PointEstimates extends Component {
       );
     }
 
-    console.log(returnValue);
     return returnValue;
   }
 
@@ -73,12 +91,14 @@ export class PointEstimates extends Component {
     let returnValue = [];
     let histogram = this.histogram;
 
-    histogram.forEach((numPeople, numPoints ) => {
+    histogram.forEach((numPeople, numPoints ) => { 
       returnValue.push(
         <div>
-          <div className="VerticalBar" style={{height: `${numPeople}em`}}>
-            &nbsp;
-          </div>
+          {this.props.selfHasEstimated && 
+            <div className="VerticalBar" style={{height: `${numPeople}em`}}>
+              &nbsp;
+            </div>
+          }
           <div>
             <button onClick={() => this.props.handleChoice(numPoints)}>
               {numPoints}

@@ -78,7 +78,6 @@ export default class Api {
 	}
 
 	handleSocketMessage = (msg) => {
-		console.log('received message', msg);
 		let eventData = null;
 		try {
 			eventData = JSON.parse(msg.data);

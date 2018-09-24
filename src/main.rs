@@ -1,4 +1,4 @@
-#![allow(unused_imports)]
+#![allow(unused_imports, unused_variables)]
 extern crate actix_web;
 extern crate actix;
 use actix::prelude::*;
@@ -71,8 +71,6 @@ struct RelayedMessage {
 impl Handler<RelayedMessage> for Ws {
     type Result = ();
     fn handle(&mut self, msg: RelayedMessage, ctx: &mut Self::Context) {
-        println!("Receive RelayedMessage {:}", msg.msg);
-
         ctx.text(serde_json::to_string(&msg).unwrap());
     }
 
