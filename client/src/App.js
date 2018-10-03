@@ -63,6 +63,7 @@ export default class App extends Component {
           handleChoice={this.handlePointChoice} 
           selfHasEstimated={this.state.selfHasEstimated} />
         <button onClick={this.handleClickClear}>Clear</button>
+        <div>submissions: {Object.keys(this.state.pointEstimates).length}</div>
       </div>
     );
   }
@@ -131,4 +132,4 @@ function fibbinacciSeries(numElements) {
   }
   return series
 }
-const FIBBINACCI_SERIES = fibbinacciSeries(10);
+const FIBBINACCI_SERIES = fibbinacciSeries(15);
