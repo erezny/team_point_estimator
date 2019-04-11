@@ -40,12 +40,15 @@ export default class App extends Component {
         ...prevState.pointEstimates,
         [msg.client_id]: estimateNum,
       },
-      selfHasEstimated: prevState.selfHasEstimated || clientId === this.clientId
     }))
   }
 
   handleClickClear = () => {
     this.api.sendApiPacket("clear")
+  }
+  
+  handleClickShow = () => {
+    this.setState({selfHasEstimated:true})
   }
 
   handleClear = () => {
@@ -63,6 +66,7 @@ export default class App extends Component {
           handleChoice={this.handlePointChoice} 
           selfHasEstimated={this.state.selfHasEstimated} />
         <button onClick={this.handleClickClear}>Clear</button>
+        <button onClick={this.handleClickShow}>Show</button>
         <div>submissions: {Object.keys(this.state.pointEstimates).length}</div>
       </div>
     );
@@ -96,7 +100,7 @@ export class PointEstimates extends Component {
 
     histogram.forEach((numPeople, numPoints ) => { 
       returnValue.push(
-        <div style={{width: avgWidth}}>
+        <div key={`${numPoints}`} style={{width: avgWidth}}>
         <div className="VerticalBarSpace">
           {this.props.selfHasEstimated && 
             <div className="VerticalBar" style={{height: `${numPeople}em`}}>

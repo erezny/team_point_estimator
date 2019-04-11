@@ -7,6 +7,7 @@ const loc = window.location;
 const prot = loc.protocol === 'https:' ? 'wss:' : 'ws:';
 let url = prot + '//' + loc.hostname + ':8080/api/ws';
 // let url = "ws://localhost:8080/api/ws"
+ url = "wss://586823cb.ngrok.io/api/ws";
 const socket = () => {
 	let socket = null;
 	try {
