@@ -10,9 +10,7 @@ export default class App extends Component {
     this.api.handle.choosePoints = (msg) => this.handleChoosePoints(msg);
     this.api.handle.clear = (msg) => this.handleClear(msg);
     
-    this.randomRegistrationId = `${Math.random()}`
     this.clientId = undefined;
-    this.api.sendApiPacket("register", this.randomRegistrationId);
     this.api.handle.register = (msg) => this.handleRegister(msg);
 
     this.state = {
@@ -22,7 +20,7 @@ export default class App extends Component {
   }
 
   handleRegister = (msg) => {
-    if (msg.msg.msg == this.randomRegistrationId && this.clientId === undefined) {
+    if (this.clientId === undefined) {
       this.clientId = msg.client_id;
     }
   }

@@ -3,11 +3,30 @@
 import camelCase from 'camelcase';
 // import * as actions from '../actions';
 
+
+const randomRegistrationId = function(){
+  const storageString = sessionStorage.getItem('sessionInfo');
+  let storageData = null;
+  try {
+    storageData = JSON.parse(storageString);
+  }
+  catch (e) {
+    console.log(`error parsing local sessionInfo`, { storageString });
+    storageData = null
+  }
+  if (storageData == null) {
+    storageData = `${Math.random()}`
+    sessionStorage.setItem('sessionInfo', JSON.stringify(storageData));
+  }
+  return storageData;
+}()
+
 const loc = window.location;
 const prot = loc.protocol === 'https:' ? 'wss:' : 'ws:';
+
 let url = prot + '//' + loc.hostname + ':8080/api/ws';
-// let url = "ws://localhost:8080/api/ws"
- url = "wss://586823cb.ngrok.io/api/ws";
+url = `ws://localhost:8080/api/ws/${randomRegistrationId}`
+// url = "wss://586823cb.ngrok.io/api/ws";
 const socket = () => {
 	let socket = null;
 	try {
@@ -133,7 +152,7 @@ export default class Api {
 			action: camelCase(action),
 			msg
 		};
-		switch (this.isRegistered && this.storeQueue.length === 0) {
+		switch (this.storeQueue.length === 0) {
 			case false: this.storeQueue.push(actionMsg);
 				break;
 			case true: this.sendApiPacket(actionMsg.action, actionMsg.msg);

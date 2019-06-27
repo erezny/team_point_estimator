@@ -19,12 +19,14 @@ use std::collections::HashMap;
 /// Define http actor
 struct Ws {
     client_id: usize,
+    registration_id: String,
 }
 
 impl Ws {
-    fn new() -> Ws {
+    fn new(registration_id: String) -> Ws {
         Ws {
             client_id: 0,
+            registration_id: registration_id,
         }
     }
 }
@@ -51,9 +53,9 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for Ws {
     }
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        ctx.state().write().unwrap().new_client(&mut self.client_id, ctx.address());
+        ctx.state().write().unwrap().new_client(&mut self.client_id, &self.registration_id, ctx.address());
 
-        println!("connection opened");
+        println!("connection opened client_id: {}, registration_id {}", self.client_id, self.registration_id);
     }
 
     fn finished(&mut self, ctx: &mut Self::Context) {
@@ -62,7 +64,7 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for Ws {
     }
 }
 
-#[derive(Debug,Message,Serialize, Deserialize)]
+#[derive(Debug,Message,Serialize, Deserialize,Clone)]
 struct RelayedMessage {
     client_id: usize,
     msg: serde_json::Value,
@@ -77,37 +79,56 @@ impl Handler<RelayedMessage> for Ws {
 }
 
 // This struct represents state
-#[derive(Clone)]
 struct AppState {
     clients: HashMap<usize,Addr<Ws>>,
-    next_index: usize
-
+    registrations: HashMap<String,usize>,
+    next_index: usize,
+    recent_messages: Vec<RelayedMessage>,
 }
 impl AppState {
     pub fn new() -> AppState {
         AppState {
             clients: HashMap::new(),
+            registrations: HashMap::new(),
             next_index: 1,
+            recent_messages: Vec::new(),
         }
     }
 
-    pub fn send_to_all(&self, client_id: usize, msg: serde_json::Value) {
+    pub fn send_to_all(&mut self, client_id: usize, msg: serde_json::Value) {
         println!("send_to_all: {:}", msg);
+        let clear = msg["action"] == "clear";
+        let message = RelayedMessage {
+                client_id: client_id, 
+                msg: msg,
+        };
 
         for (_, addr) in self.clients.iter() {
-            addr.do_send(RelayedMessage {
-                    client_id: client_id, 
-                    msg: msg.clone()
-            });
+            addr.do_send(message.clone());
         }
+        if clear { self.recent_messages.clear()}
+        self.recent_messages.push(message);
     }
 
-    pub fn new_client(&mut self, client_id: &mut usize, address: Addr<Ws>) {
-        while self.clients.contains_key(&self.next_index) {
-            self.next_index += 1;
+    pub fn new_client(&mut self, client_id: &mut usize, registration_id: &String, address: Addr<Ws>) {
+        if self.registrations.contains_key(registration_id) {
+            *client_id = self.registrations.get(registration_id).unwrap().clone();
+            self.clients.insert(*client_id, address.clone());
+        } else {
+            while self.clients.contains_key(&self.next_index) {
+                self.next_index += 1;
+            }
+            *client_id = self.next_index;
+            self.registrations.insert(registration_id.clone(), client_id.clone());
+            self.clients.insert(self.next_index, address.clone());
         }
-        *client_id = self.next_index;
-        self.clients.insert(self.next_index, address);
+        self.send_all_to_new_client(address);
+    }
+    
+    fn send_all_to_new_client(&self, address: Addr<Ws>) {
+        for message in self.recent_messages.iter() {
+            address.do_send(message.clone());
+        }
     }
 
     pub fn remove_client(&mut self, client_id: usize) {
@@ -125,7 +146,7 @@ fn main() {
 
     server::new(move || {
         App::with_state(app_state.clone())
-        .resource("/api/ws", |r| r.f(|req| ws::start(req, Ws::new())))
+        .resource("/api/ws/{registration}", |r| r.f(|req| ws::start(req, Ws::new(req.match_info().get("registration").unwrap().to_string()))))
     }).bind("0.0.0.0:8080")
         .unwrap()
         .run();
