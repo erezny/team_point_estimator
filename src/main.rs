@@ -143,11 +143,17 @@ fn main() {
     let yarn_process = std::process::Command::new("yarn")
             .current_dir("./client")
             .args(&["start"]).spawn().unwrap();
-
+            
+    let ngrok_process = std::process::Command::new("ngrok")
+            .args(&["http","3006","--subdomain","team-point-estimator"]).spawn().unwrap();
+              
+    let ngrok_api_process = std::process::Command::new("ngrok")
+            .args(&["http","8085","--subdomain","team-point-estimator-api"]).spawn().unwrap();
+            
     server::new(move || {
         App::with_state(app_state.clone())
         .resource("/api/ws/{registration}", |r| r.f(|req| ws::start(req, Ws::new(req.match_info().get("registration").unwrap().to_string()))))
-    }).bind("0.0.0.0:8080")
+    }).bind("0.0.0.0:8085")
         .unwrap()
         .run();
 

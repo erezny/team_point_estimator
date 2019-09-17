@@ -63,8 +63,8 @@ export default class App extends Component {
           pointEstimates={this.state.pointEstimates} 
           handleChoice={this.handlePointChoice} 
           selfHasEstimated={this.state.selfHasEstimated} />
-        <button onClick={this.handleClickClear}>Clear</button>
-        <button onClick={this.handleClickShow}>Show</button>
+        <button className="Clear" onClick={this.handleClickClear}>Clear</button>
+        <button className="Show" onClick={this.handleClickShow}>Show</button>
         <div>submissions: {Object.keys(this.state.pointEstimates).length}</div>
       </div>
     );

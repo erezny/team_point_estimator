@@ -30,7 +30,7 @@
 .Histogram {
 }
 .VerticalBarSpace {
-  height: 50vh;
+  height: 20vh;
 }
 .Histogram > div {
   display: inline-block;
@@ -44,4 +44,13 @@ button {
   width: 90%;
   height: 5em;
   margin-top: 1em;
+}
+
+.Clear {
+  width: 40%;
+  margin: 1em;
+}
+.Show {
+  width: 40%;
+  margin: 1em;
 }
